@@ -1,0 +1,36 @@
+### Teraform
+.terraform
+tfplan
+.terraform.lock.hcl
+
+### Node artifact files
+node_modules/
+coverage/
+dist/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+.run
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/nbdist/
+/.nb-gradle/
+./build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### MacOS ###
+.DS_Store
+
+### Lambda Packages ###
+/src/lambdas/*.zip
+/src/lambda-layers/*.zip
+
+.build
+.serverless
+.localstack
