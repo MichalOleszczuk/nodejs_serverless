@@ -1,0 +1,91 @@
+service: serverlessSetup
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-west-1
+
+# functions
+functions:
+  hello:
+    handler: src/lambdas/hello.handler
+    events: # The events that trigger this function
+      - http: 
+          path: serverlessSetup/hello
+          method: get
+  goodbye:
+    handler: src/lambdas/goodbye.handler
+    events:
+      - http: 
+          path: serverlessSetup/goodbye
+          method: post
+  question:
+    handler: src/lambdas/question.handler
+    dependsOn: SNSHelloEvent
+    events:
+      - sns:
+          arn: !Ref SNSHelloEvent
+          topicName: hello-event
+  stepOne:
+    handler: src/lambdas/stepOne.handler
+  stepTwo:
+    handler: src/lambdas/stepTwo.handler
+  stepThree:
+    handler: src/lambdas/stepThree.handler
+  stepThreeError:
+    handler: src/lambdas/stepThreeError.handler
+  startSF:
+    handler: src/lambdas/startSF.handler
+    events: # The events that trigger this function
+      - http: 
+          path: serverlessSetup/startSF
+          method: get
+
+custom:
+  serverless-offline:
+  stepFunctionsLocal:
+    accountId: 101010101010
+    region: us-east-1
+    TaskResourceMapping:
+      FirstState: arn:aws:lambda:us-east-1:101010101010:function:stepOne
+      FinalState: arn:aws:lambda:us-east-1:101010101010:function:stepTwo
+
+stepFunctions:
+  stateMachines:
+    WaitMachine:
+      definition:
+        Comment: "An example of the Amazon States Language using wait states"
+        StartAt: FirstState
+        States:
+          FirstState:
+            Type: Task
+            Resource: 
+              Fn::GetAtt: [stepOne, Arn]
+            Next: wait_using_seconds
+          wait_using_seconds:
+            Type: Wait
+            Seconds: 10
+            Next: FinalState
+          FinalState:
+            Type: Task
+            Resource: 
+              Fn::GetAtt: [stepTwo, Arn]
+            End: true
+
+# Serverless plugins
+plugins:
+  - serverless-plugin-typescript
+  - serverless-step-functions
+  - serverless-step-functions-local
+  - serverless-offline-lambda
+  - serverless-offline
+
+# Resources your functions use
+resources:
+  Resources:
+    # SNS Topics
+    SNSHelloEvent:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: Hello Event Topic
+        TopicName: hello-event

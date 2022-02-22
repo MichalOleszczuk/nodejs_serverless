@@ -34,3 +34,4 @@ dist/
 .build
 .serverless
 .localstack
+.step-functions-local
